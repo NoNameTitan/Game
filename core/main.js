@@ -6,7 +6,7 @@ var frameTime = 0, lastTime = new Date, thisTime
 class Main {
     /** @type { Main } */
     static #self__
-    static mapSize = v2(16,8)
+    static mapSize = v2(16, 8)
     static #block = v3(32, 32, 24)
     /** @type { BigMap } */
     #map
@@ -16,31 +16,57 @@ class Main {
     #hero
     /** @type { Draw } */
     #draw
-    /** @type { new Sprite } */
-    #characters
-    /** @type { new Matrix } */
-    #matrix
+    #characters = Sprite
+    #matrix = Matrix
 
     constructor(canvas = document.createElement("canvas")) {
         if ((Main.#self__ == undefined) || (Main.#self__ == null)) {
             this.#map = new BigMap(Main.mapSize, Main.block)
             this.#hero = new Hero()
             this.#draw = new Draw(canvas, this.#map, Sprite, Main.block)
-            this.#characters = Sprite
             this.#enemy = new Array()
-            this.#matrix = Matrix
+            this.keyState = {
+                KeyW: false,
+                KeyA: false,
+                KeyS: false,
+                KeyD: false
+            }
 
             Main.#self__ = this
         } else {
             return Main.#self__
         }
     }
+    hasKeyMove(keyCode) {
+        var res = false
+        var keyState = Main.getData().self.keyState
+        for (const key in keyState) {
+            if (keyState.hasOwnProperty(key)) {
+                if (keyCode == key) {
+                    return true
+                }
+            }
+        }
+        return false
+    }
+    keyMove(ev) {
+        var { self } = Main.getData()
+        if (self.hasKeyMove(ev.code)) {
+            self.keyState[ev.code] = true
+        }
+    }
+    keyStop(ev) {
+        var { self } = Main.getData()
+        if (self.hasKeyMove(ev.code)) {
+            self.keyState[ev.code] = false
+        }
+    }
 
     init() {
         for (let i = 0; i < 11; i++) {
-            this.#enemy.push(new Sprite("Enemy",0.4,colors.violet))
+            this.#enemy.push(new Sprite("Enemy", 0.4, colors.violet))
             this.#enemy[i].setPos(
-                Math.random() * (Main.mapSize.x -4) + 2,
+                Math.random() * (Main.mapSize.x - 4) + 2,
                 Math.random() * (Main.mapSize.y - 4) + 2
             )
             this.#enemy[i].setTo(-0.002, -0.02)
@@ -50,6 +76,10 @@ class Main {
         setInterval(function () {
             out.innerHTML = (1000 / frameTime).toFixed(1) + " tick";
         }, 1000);
+
+
+        document.addEventListener("keydown", this.keyMove)
+        document.addEventListener("keyup", this.keyStop)
         this.tick()
     }
     static getData() {
@@ -57,20 +87,49 @@ class Main {
             self: Main.#self__,
             map: Main.#self__.#map,
             characters: Main.#self__.#characters,
-            matrix: Main.#self__.#matrix
+            matrix: Main.#self__.#matrix,
+            hero: Main.#self__.#hero
         }
+    }
+    getRandomMove() {
+        var k = {
+            KeyW:false,
+            KeyA:false,
+            KeyS:false,
+            KeyD:false
+        }
+        if (Math.random() > Math.random()) {
+            k.KeyW = true
+        }
+        else  {
+            k.KeyS = true
+        }
+        if (Math.random() > Math.random()) {
+            k.KeyA = true
+        }
+        else {
+            k.KeyD = true
+        }
+        return k
     }
     move(sprite) {
         let { self } = Main.getData()
         let pos = sprite.getPos()
         let arr = self.getArrPos(pos.x, pos.y)
+        if (sprite instanceof Hero) {
+            sprite.updateX(self.keyState)
+        } else {
+            sprite.updateX(self.getRandomMove())
+        }
 
-        sprite.updateX()
         for (let wall of arr) {
             collisionDetectX(sprite, wall)
         }
-
-        sprite.updateY()
+        if (sprite instanceof Hero) {
+            sprite.updateY(self.keyState)
+        } else {
+            sprite.updateY(self.getRandomMove())
+        }
         for (let wall of arr) {
             collisionDetectY(sprite, wall)
         }
@@ -79,9 +138,10 @@ class Main {
         let thisFrameTime = (thisTime = new Date) - lastTime;
         frameTime += (thisFrameTime - frameTime) / filterStrength;
         lastTime = thisTime;
-        let { self, map, characters, matrix } = Main.getData()
+        let { self, map, characters, matrix, hero } = Main.getData()
 
         self.#draw.update()
+        // self.move(hero)
         characters.forEach((sprite) => {
             self.move(sprite)
         });

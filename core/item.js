@@ -23,10 +23,6 @@ class Block {
     getSize() {
         return this.#size
     }
-    getset(x, y) {
-        this.pos.set(x, y)
-        return this
-    }
     copy(x, y) {
         return this.pos.copy(x, y)
     }

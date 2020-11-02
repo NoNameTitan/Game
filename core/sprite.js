@@ -22,25 +22,43 @@ class Sprite {
     static getList() {
         return Sprite.#list
     }
+    /**
+     * @param {( sprite: Sprite, index: number )=>any } callback
+     */
+    static forEachWithOutHero(callback) {
+        var arr = Sprite.#list
+        for (let i = 0; i < arr.length; i++) {
+            if (!(arr[i] instanceof Hero)) {
+                callback(Sprite.#list[i], i)
+            }
+        }
+    }
+    /**
+     * @param {( sprite: Sprite, index: number )=>any } callback
+     */
     static forEach(callback) {
         for (let i = 0; i < Sprite.#list.length; i++) {
             callback(Sprite.#list[i], i)
         }
     }
-    updateX() {
-        if (this.state.a) {
+    updateX(keyState) {
+        if (keyState.KeyA && keyState.KeyD) {
+            this.setX(0)
+        } else if (keyState.KeyA) {
             this.setX(this.speed * (-1))
-        } else if (this.state.d) {
+        } else if (keyState.KeyD) {
             this.setX(this.speed)
         } else {
             this.setX(0)
         }
         this.#pos.addX(this.#to.x)
     }
-    updateY() {
-        if (this.state.w) {
+    updateY(keyState) {
+        if (keyState.KeyW && keyState.KeyS) {
+            this.setX(0)
+        } else if (keyState.KeyW) {
             this.setY(this.speed * (-1))
-        } else if (this.state.s) {
+        } else if (keyState.KeyS) {
             this.setY(this.speed)
         } else {
             this.setY(0)
@@ -85,7 +103,7 @@ class Sprite {
 class Hero extends Sprite {
     /** @type { Hero } */
     static #self__
-    
+
     constructor(style = [255, 255, 255]) {
         if ((Hero.#self__ == undefined) || (Hero.#self__ == null)) {
             super("Hero", 0.3, style)
@@ -97,8 +115,8 @@ class Hero extends Sprite {
     }
     init(x, y) {
         Hero.#self__.setPos(x, y)
-        document.addEventListener("keydown", Hero.#self__.move)
-        document.addEventListener("keyup", Hero.#self__.stop)
+        // document.addEventListener("keydown", Hero.#self__.move)
+        // document.addEventListener("keyup", Hero.#self__.stop)
     }
     move(ev) {
         let self = Hero.#self__

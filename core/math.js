@@ -69,8 +69,8 @@ function v2(x, y) {
     this.y = y || 0
 }
 v2.prototype.set = function (x, y) {
-    this.x = x
-    this.y = y
+    this.x = (x || 1)
+    this.y = (y || 1)
 }
 v2.prototype.add = function (x = 0, y = 0) {
     this.x = this.x + x
@@ -87,7 +87,8 @@ v2.prototype.push = function (second = v2()) {
     this.y = this.y + second.y
 }
 v2.prototype.copy = function (x, y) {
-    return { x: this.x * (x || 1), y: this.y * (y || 1) }
+    return v2(this.x * (x || 1), this.y * (y || 1))
+    // return { x: this.x * (x || 1), y: this.y * (y || 1) }
 }
 v2.prototype.clear = function () {
     this.x = this.y = 0
@@ -184,7 +185,7 @@ class Matrix {
             Matrix.listY[i].forBlock(callback)
         }
     }
-    static getBlock(x,y){
+    static getBlock(x, y) {
         return Matrix.listY[y]?.all[x]
     }
 }
