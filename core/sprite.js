@@ -133,3 +133,22 @@ class Hero extends Sprite {
         if (ev.code == "KeyD") { self.state.d = false }
     }
 }
+class Enemy extends Sprite {
+    constructor(style = [255, 125, 125]) {
+        super("Enemy", 0.3, style)
+        this.size = v3(24, 24, 32)
+        this.mm = {x:0,y:0}
+    }
+    init(x, y) {
+        this.setPos(x, y)
+    }
+    move(){
+        let nmm = {x:RandomInt(-1,1),y:RandomInt(-1,1)}
+        if(!(this.mm.x == -nmm.x)){
+            this.mm.x = nmm.x
+        }
+        if(!(this.mm.y == -nmm.y)){
+            this.mm.y = nmm.y
+        }
+    }
+}

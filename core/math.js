@@ -198,6 +198,11 @@ function sortX(a, b) {
 }
 
 
+function RandomInt(start,finish){
+    return Math.round( (Math.random()*finish) + start )
+}
+
+
 let colors = {
     white: [253, 255, 252],
     black: [28, 28, 28],
