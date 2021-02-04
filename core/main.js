@@ -118,18 +118,20 @@ class Main {
         let arr = self.getArrPos(pos.x, pos.y)
         if (sprite instanceof Hero) {
             sprite.updateX(self.keyState)
-        } else {
-            sprite.updateX(self.getRandomMove())
-        }
+        } 
+        // else {
+        //     sprite.updateX(self.getRandomMove())
+        // }
 
         for (let wall of arr) {
             collisionDetectX(sprite, wall)
         }
         if (sprite instanceof Hero) {
             sprite.updateY(self.keyState)
-        } else {
-            sprite.updateY(self.getRandomMove())
-        }
+        } 
+        // else {
+        //     sprite.updateY(self.getRandomMove())
+        // }
         for (let wall of arr) {
             collisionDetectY(sprite, wall)
         }
@@ -141,10 +143,10 @@ class Main {
         let { self, map, characters, matrix, hero } = Main.getData()
 
         self.#draw.update()
-        // self.move(hero)
-        characters.forEach((sprite) => {
-            self.move(sprite)
-        });
+        self.move(hero)
+        // characters.forEach((sprite) => {
+        //     self.move(sprite)
+        // });
         setTimeout(Main.#self__.tick, 1000 / 75)
     }
     getArrPos(x, y) {

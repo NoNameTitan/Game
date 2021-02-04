@@ -2,7 +2,11 @@ import Scene from "./scene.js"
 import { Mono, is, logger, forEach } from "./math_.js"
 import Event from "./event.js"
 import Draw from "../draw/draw_.js"
-import version from "./version.js";
+import version from "./version.js"
+
+let tick = document.getElementById("tick")
+let filterStrength2 = 20;
+let frameTime2 = 0, lastTime2 = new Date, thisTime2
 
 // Types
 /**
@@ -30,13 +34,17 @@ class Engine extends Mono {
     #draw
     /** @type { Scene } */
     #nowScene
-    #tickTime = 30
+    #tickTime = 50
     #inited = false
+
+    /** @type { Engine } */
+    static #self__
+
     constructor() {
         super()
         this.#event = new Event(["init", "kill", "tick", "update", "use"])
         this.addEvent = this.#event.addEvent
-
+        Engine.#self__ = this
     }
     init() {
         if (this.#inited) { return }
@@ -44,6 +52,13 @@ class Engine extends Mono {
         this.#inited = true
         this.#draw?.init()
         this.#nowScene?.init()
+
+    }
+    viewTick(){
+        lastTime2 = new Date()
+        setInterval(function () {
+            tick.innerHTML = (1000 / frameTime2).toFixed(1) + " tick"
+        }, 1000)
     }
     use(box) {
         this.#event?.callEvent("use", this)
@@ -57,15 +72,24 @@ class Engine extends Mono {
         }
         return done
     }
-    start(param) {
-
+    start() {
+        this.viewTick()
+        this.tick()
     }
     tick() {
-        this.#event?.callEvent("tick", this)
+        let self =Engine.#self__
 
+        let thisFrameTime2 = (thisTime2 = new Date) - lastTime2;
+        frameTime2 += (thisFrameTime2 - frameTime2) / filterStrength2;
+        lastTime2 = thisTime2
+
+        self.#event?.callEvent("tick", self)
+
+        setTimeout(self.tick, 1000 / self.#tickTime)
     }
     update() {
-        this.#event?.callEvent("update", this)
+        let self =Engine.#self__
+        self.#event?.callEvent("update", self)
 
     }
     destroy() {
@@ -81,8 +105,8 @@ class Engine extends Mono {
         logger("KILL", ...kills)
     }
     /**  @param { number } value */
-    set tickTime(value) {
-        if (typeof value == "number" && value >= 38 && value <= 120) {
+    set TickTime(value) {
+        if (typeof value == "number" && value >= 28 && value <= 120) {
             this.#tickTime = value
         }
     }

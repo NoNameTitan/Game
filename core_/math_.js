@@ -8,6 +8,7 @@
 
 
 
+
 function logger(name, ...args) {
     let style = "color: DodgerBlue;"
     console.log("%c[log]: " + name, style)
@@ -126,12 +127,12 @@ EXTENDS(v2, {
  * @param { number } z
  */
 function v3(x, y, z) {
-    if (this == globalThis) {
+    if (is.class_(this)) {
         return new v3(x, y, z)
     }
-    this.x = x || 0
-    this.y = y || 0
-    this.z = z || 0
+    this.x = (x || 0)
+    this.y = (y || 0)
+    this.z = (z || 0)
 }
 
 EXTENDS(v3, {
@@ -170,6 +171,49 @@ function forEach(arr, callback) {
         }
     }
 }
+
+let colors = {
+    white: [253, 255, 252],
+    black: [28, 28, 28],
+    red: [214, 40, 40],
+    green: [5, 214, 158],
+    blue: [4, 102, 200],
+    violet: [122, 0, 122]
+}
+
+/**
+ * @param { number[] | v3 } value
+ */
+function rgb(value) {
+    if (value instanceof v3) {
+        return `rgb(${value.x}, ${value.y}, ${value.z})`
+    }
+    return `rgb(${value[0]}, ${value[1]}, ${value[2]})`
+}
+/**
+ * @param { number[] | v3 } value
+ * @param { number[] | v3 } add
+ */
+function rgb_assets(value, add) {
+    if (value instanceof v3) {
+        value = [value.x, value.y, value.z]
+    }
+    if (add instanceof v3) {
+        add = [add.x, add.y, add.z]
+    }
+    let result = new Array()
+    for (let i = 0; i < 3; i++) {
+        result[i] = value[i] + add[i]
+        if (value[i] + add[i] > 255) {
+            result[i] = 255
+        }
+        if (value[i] + add[i] < 0) {
+            result[i] = 0
+        }
+    }
+    return `rgb(${result[0]}, ${result[1]}, ${result[2]})`
+}
+console.log(rgb_assets(v3(23, 23, 23), [3, 3, 3]))
 
 export {
     v2,

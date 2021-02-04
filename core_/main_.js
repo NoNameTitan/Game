@@ -6,7 +6,9 @@ class Main extends Engine {
         super()
         this.use(new Draw(document.getElementById("canvas")))
         this.init()
+        this.start()
     }
 }
 let main = new Main()
+
 export default Main
