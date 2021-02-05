@@ -213,7 +213,6 @@ function rgb_assets(value, add) {
     }
     return `rgb(${result[0]}, ${result[1]}, ${result[2]})`
 }
-console.log(rgb_assets(v3(23, 23, 23), [3, 3, 3]))
 
 export {
     v2,

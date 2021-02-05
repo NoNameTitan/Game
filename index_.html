@@ -1,10 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+        }
+
+        #fps,
+        #tick {
+            position: fixed;
+            top: 0;
+            color: crimson;
+            font-weight: bold;
+            font-family: sans-serif;
+            font-size: 1.5rem;
+        }
+
+        #fps {
+            left: 0;
+        }
+
+        #tick {
+            right: 0;
+        }
+    </style>
 </head>
+
 <body>
     <canvas id="canvas"></canvas>
     <div id="fps"></div>
@@ -21,4 +47,5 @@
     <!-- DRAW -->
     <script src="./draw/draw_.js" type="module" defer></script>
 </body>
+
 </html>

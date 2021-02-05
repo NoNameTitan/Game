@@ -31,6 +31,7 @@ class Draw extends Mono {
         c.height < 300 ? c.height = 300 : void 0
 
         this.fpsInit()
+        this.reSize()
         this.drawIntro()
         this.tick()
     }
@@ -56,6 +57,11 @@ class Draw extends Mono {
             self.draw(self.ctx)
         }
         setTimeout(self.tick, 1000 / self.#fps)
+    }
+    reSize(){
+        console.log(this.canvas)
+        this.canvas.width = document.body.clientWidth
+        this.canvas.height = document.body.clientHeight
     }
 
     drawIntro() {
