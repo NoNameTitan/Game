@@ -71,7 +71,7 @@ const is = {
     func: (value) => {
         return (typeof value == "function")
     },
-    class_: (value) => {
+    notClass: (value) => {
         return (value == globalThis || is.empty(value))
     },
     /**
@@ -87,7 +87,7 @@ const is = {
  * @param { number } y
  */
 function v2(x, y) {
-    if (is.class_(this)) {
+    if (is.notClass(this)) {
         return new v2(x, y)
     }
     this.x = (x || 0)
@@ -127,7 +127,7 @@ EXTENDS(v2, {
  * @param { number } z
  */
 function v3(x, y, z) {
-    if (is.class_(this)) {
+    if (is.notClass(this)) {
         return new v3(x, y, z)
     }
     this.x = (x || 0)

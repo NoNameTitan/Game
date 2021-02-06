@@ -34,19 +34,23 @@ class Event {
                 if (this.#eventNames.includes(eventName) &&
                     !is.empty(this.#events[eventName])) {
                     this.#events[eventName].call(self, ...args)
+                    return true
                 }
+                return false
             },
             /**
              * @param { string } eventName
              * @param { alphaSelf } callback
              * @param {{ once: boolean }} options
              */
-            addEvent: (eventName, callback, options = {})=>{
+            addEvent: (eventName, callback, options = {}) => {
+                let a, b
                 if (options?.once) {
-                    this.once(eventName, callback)
-                }else{
-                    this.on(eventName, callback)
+                    a = this.once(eventName, callback)
+                } else {
+                    b = this.on(eventName, callback)
                 }
+                return (a || b)
             }
         }
     }
@@ -57,7 +61,9 @@ class Event {
     on(eventName, callback) {
         if (this.#eventNames.includes(eventName)) {
             this.#events[eventName] = callback
+            return true
         }
+        return false
     }
     /**
      * @param { string } eventName
@@ -69,7 +75,9 @@ class Event {
                 callback(this, ...args)
                 this.#events[eventName] = undefined
             }
+            return true
         }
+        return false
     }
     destroy() {
         delete this

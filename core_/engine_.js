@@ -48,11 +48,14 @@ class Engine extends Mono {
     }
     init() {
         if (this.#inited) { return }
+        if(!(this.#draw instanceof Draw)){
+            this.#draw = new Draw()
+        }
         this.#event?.callEvent("init", this)
-        this.#inited = true
-        this.#draw?.init()
         this.#nowScene?.init()
+        this.#draw?.init(this.#nowScene)
 
+        this.#inited = true
     }
     viewTick(){
         lastTime2 = new Date()
@@ -90,7 +93,6 @@ class Engine extends Mono {
     update() {
         let self =Engine.#self__
         self.#event?.callEvent("update", self)
-
     }
     destroy() {
         this.#event?.callEvent("kill", this)
@@ -109,6 +111,9 @@ class Engine extends Mono {
         if (typeof value == "number" && value >= 28 && value <= 120) {
             this.#tickTime = value
         }
+    }
+    static get self(){
+        return Engine.#self__ || new Error("Engine not found")
     }
 }
 export default Engine

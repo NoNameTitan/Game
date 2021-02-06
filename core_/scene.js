@@ -1,4 +1,5 @@
 import { is } from "./math_.js"
+import Draw from "../draw/draw_.js"
 
 // Types
 /**
@@ -16,6 +17,8 @@ class Scene {
         this.init_ = undefined
         /** @type { alphaScene } */
         this.update_ = undefined
+        /** @type {( ctx: CanvasRenderingContext2D ) => void } */
+        this.draw_ = undefined
     }
     init() {
         if (this.#inited) { return }
