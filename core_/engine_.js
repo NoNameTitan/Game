@@ -44,11 +44,12 @@ class Engine extends Mono {
         super()
         this.#event = new Event(["init", "kill", "tick", "update", "use"])
         this.addEvent = this.#event.addEvent
+        this.updateOnTick = false
         Engine.#self__ = this
     }
     init() {
         if (this.#inited) { return }
-        if(!(this.#draw instanceof Draw)){
+        if (!(this.#draw instanceof Draw)) {
             this.#draw = new Draw()
         }
         this.#event?.callEvent("init", this)
@@ -57,7 +58,7 @@ class Engine extends Mono {
 
         this.#inited = true
     }
-    viewTick(){
+    viewTick() {
         lastTime2 = new Date()
         setInterval(function () {
             tick.innerHTML = (1000 / frameTime2).toFixed(1) + " tick"
@@ -80,18 +81,19 @@ class Engine extends Mono {
         this.tick()
     }
     tick() {
-        let self =Engine.#self__
+        let self = Engine.#self__
 
         let thisFrameTime2 = (thisTime2 = new Date) - lastTime2;
         frameTime2 += (thisFrameTime2 - frameTime2) / filterStrength2;
         lastTime2 = thisTime2
 
         self.#event?.callEvent("tick", self)
+        self.updateOnTick ? self.update() : void 0
 
         setTimeout(self.tick, 1000 / self.#tickTime)
     }
     update() {
-        let self =Engine.#self__
+        let self = Engine.#self__
         self.#event?.callEvent("update", self)
     }
     destroy() {
@@ -112,7 +114,7 @@ class Engine extends Mono {
             this.#tickTime = value
         }
     }
-    static get self(){
+    static get self() {
         return Engine.#self__ || new Error("Engine not found")
     }
 }

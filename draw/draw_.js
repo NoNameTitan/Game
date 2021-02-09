@@ -19,7 +19,7 @@ class Draw extends Mono {
         this.canvas = canvas || document.getElementsByTagName("canvas")[0]
         this.ctx = this.canvas.getContext("2d")
         /** @type {( ctx: CanvasRenderingContext2D ) => void } */
-        this.draw
+        this.scene
         Draw.#self__ = this
     }
     /**
@@ -28,6 +28,10 @@ class Draw extends Mono {
     init(scene) {
         if (this.#inited) { return }
         this.#inited = true
+
+        if (scene instanceof Scene) {
+            this.scene = scene
+        }
 
         let c = this.canvas
 
@@ -38,10 +42,6 @@ class Draw extends Mono {
         this.reSize()
         this.drawIntro()
         this.tick()
-
-        if (scene instanceof Scene) {
-            this.draw = scene.draw_
-        }
     }
     fpsInit() {
         lastTime2 = new Date()
@@ -64,8 +64,8 @@ class Draw extends Mono {
         frameTime2 += (thisFrameTime2 - frameTime2) / filterStrength2;
         lastTime2 = thisTime2
 
-        if (is.func(self.draw)) {
-            self.draw(self.ctx)
+        if (is.func(self.scene?.draw_)) {
+            self.scene.draw_(self.ctx)
         }
 
         setTimeout(self.tick, 1000 / self.#fps)
@@ -74,7 +74,7 @@ class Draw extends Mono {
         if (!is.empty(x) && !is.empty(y)) {
             this.canvas.width = x
             this.canvas.height = y
-        }else{
+        } else {
             this.canvas.width = document.body.clientWidth
             this.canvas.height = document.body.clientHeight
         }

@@ -95,9 +95,9 @@ function v2(x, y) {
 }
 
 EXTENDS(v2, {
-    set: function (x, y) {
-        this.x = (x || 1)
-        this.y = (y || 1)
+    set: function (x = 1, y = 1) {
+        this.x = x
+        this.y = y
     },
     add: function (x = 0, y = 0) {
         this.x = this.x + x
@@ -222,5 +222,7 @@ export {
     Mono,
     // Mono_,
     forEach,
-    logger
+    logger,
+    rgb,
+    rgb_assets
 }
