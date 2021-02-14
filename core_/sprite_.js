@@ -10,13 +10,10 @@ class Sprite2D {
     #to
     //#endregion
 
-    constructor(name = "Sprite", radius = 0.3, style = [255, 255, 255]) {
+    constructor(name = "Sprite") {
         this.name = name
         this.#pos = v2()
         this.#to = v2()
-        this.radius = radius
-        this.style = style
-        this.speed = 0
         // Sprite2D.#list.push(this)
     }
 
@@ -38,7 +35,7 @@ class Sprite2D {
     updateX() {
         this.#pos.addX(this.#to.x)
     }
-    updateY(keyState) {
+    updateY() {
         this.#pos.addY(this.#to.y)
     }
     //#endregion

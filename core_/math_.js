@@ -58,6 +58,8 @@ class Mono {
         // }
         if (!is.empty(Mono.#classes[this.constructor.name])) {
             delete this
+            console.log(Mono.#classes[this.constructor.name])
+            console.log(this)
             throw new Error("is object a life")
         }
         Mono.#classes[this.constructor.name] = this
@@ -114,7 +116,7 @@ EXTENDS(v2, {
         this.y = this.y + second.y
     },
     copy: function (x, y) {
-        return v2(this.x * (x || 1), this.y * (y || 1))
+        return new v2(this.x * (x || 1), this.y * (y || 1))
     },
     clear: function () {
         this.x = this.y = 0
@@ -152,7 +154,7 @@ EXTENDS(v3, {
         this.z = this.z + second.z
     },
     copy: function (x, y, z) {
-        return v3(this.x * (x || 1), this.y * (y || 1), this.z * (z || 1))
+        return new v3(this.x * (x || 1), this.y * (y || 1), this.z * (z || 1))
         // return { x: this.x * (x || 1), y: this.y * (y || 1), z: this.z * (z || 1) }
     },
     clear: function () {

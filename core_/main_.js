@@ -1,171 +1,179 @@
 import Draw from "../draw/draw_.js"
 import Engine from "./engine_.js"
-import { v2, rgb, is } from "./math_.js"
+import { v2, v3, rgb, is } from "./math_.js"
 import Scene from "./scene.js"
-import Sprite2d from "./sprite_.js"
+import Sprite2D from "./sprite_.js"
+import Noise from "./noise.js"
+
+let i = new Image(22, 24)
+i.src = "../src/redTitan.png"
+console.log(i instanceof Image)
+i.addEventListener("load", (e) => {
+    console.log(e)
+})
 
 class Main extends Engine {
     constructor() {
         super()
-        let canvas = document.getElementById("canvas")
+        let canvas = document.getElementsByTagName("canvas")[0]
+        let scene = new HomeScene()
         let draw = new Draw(canvas)
-        draw.FPS = 28
-        this.TickTime = 28
+        draw.FPS = 29
+        this.use(scene)
         this.use(draw)
-        this.start()
-        this.block = 100
-        let sudoku = new SudokuScene(this.block)
-        this.use(sudoku)
         this.init()
-        draw.reSize(this.block * 3, this.block * 3)
-
-        canvas.addEventListener("click", (e) => {
-            let x = Math.floor(e.layerX / this.block),
-                y = Math.floor(e.layerY / this.block),
-                check = false
-            if (x > 2 || y > 2) {
-                return
-            }
-            sudoku.xoxo_list.forEach((xoxo) => {
-                let pos = xoxo.getPos()
-                if (pos.x == x && pos.y == y) {
-                    check = true
-                }
-            })
-            check ? void 0 : sudoku.addXOXO(v2(x, y))
+        window.addEventListener("keydown", (e) => {
+            console.log(e)
+            scene.onclick(e)
         })
-        this.check = () => {
-            if (sudoku.xoxo_list.length == 9) {
-                sudoku.xoxo_list = []
-                return
-            }
-            let g = {
-                0: [],
-                1: [],
-                2: [],
-                length: 3
-            }
-            sudoku.xoxo_list.forEach((xoxo) => {
-                g[xoxo.getX()][xoxo.getY()] = xoxo.name
-            })
-            for (let i = 0; i < g.length; i++) {
-                if (g[i][0] == g[i][1] && g[i][1] == g[i][2] && g[i][0] !== undefined) {
-                    return g[i][0]
-                }
-                if (g[0][i] == g[1][i] && g[1][i] == g[2][i] && g[0][i] !== undefined) {
-                    return g[i][0]
-                }
-            }
-            if (g[0][0] == g[1][1] && g[1][1] == g[2][2] && g[0][0] !== undefined) {
-                return g[0][0]
-            }
-            if (g[0][2] == g[1][1] && g[1][1] == g[2][0] && g[0][2] !== undefined) {
-                return g[0][2]
-            }
-        }
-        this.updateOnTick = true
-        this.addEvent("update", () => {
-            let winner = this.check()
-            if (!is.empty(winner)) {
-                sudoku.xoxo_list = []
-                alert(winner)
-            }
+        window.addEventListener("resize", () => {
+            draw.reSize()
         })
-    }
-}
-class Grid {
-    constructor(x, y) {
-        this.x = x
-        this.y = y
-    }
-    draw(ctx) {
-        let w = ctx.canvas.width
-        let h = ctx.canvas.height
-        let x__ = w / this.x
-        let y__ = h / this.y
-        for (let i = 0; i < this.x + 1; i++) {
-            for (let j = 0; j < this.y + 1; j++) {
-                ctx.moveTo(x__ * i, 0)
-                ctx.lineTo(x__ * i, h)
-                ctx.stroke()
-                ctx.moveTo(0, y__ * j)
-                ctx.lineTo(w, y__ * j)
-                ctx.stroke()
-            }
-        }
+        this.start()
+        draw.reSize()
     }
 }
 
-class XOXO extends Sprite2d {
+class SpriteBuild extends Sprite2D {
+    /** @type { number } */
+    #posZ
+    /** @type { string } */
+    #color
+    /** @type { HTMLImageElement | undefined } */
+    #skin
     /**
-     * @param { boolean } isX
-     * @param { number } block
-     * @param { v2 } gridPos
+     * @param { string } name
+     * @param { string } color
      */
-    constructor(isX, gridPos) {
-        if (isX) {
-            super("x", 1, [255, 0, 0])
-            this.draw_ = (x, pos, block) => {
-                x.beginPath()
-                x.moveTo(pos.x * block, pos.y * block)
-                x.lineTo((pos.x * block) + block, (pos.y * block) + block)
-                x.moveTo((pos.x * block) + block, pos.y * block)
-                x.lineTo(pos.x * block, (pos.y * block) + block)
-                x.strokeStyle = "#ff0000"
-                x.stroke()
-                x.closePath()
-            }
-        } else {
-            super("o", 1, [0, 0, 255])
-            this.draw_ = (x, pos, block) => {
-                let half = block / 2
-                x.beginPath()
-                x.arc((pos.x * block) + half, (pos.y * block) + half, half, 0, Math.PI * 2)
-                x.strokeStyle = "#0000ff"
-                x.stroke()
-                x.closePath()
-            }
-        }
-        this.setPos(gridPos.x, gridPos.y)
+    constructor(name, color, skin) {
+        super(name)
+        this.#color = ("string" == typeof color ? color : "#000")
+        this.#skin = (skin instanceof Image ? skin : undefined)
     }
     /**
-     * @param { CanvasRenderingContext2D } x
+     * @param { CanvasRenderingContext2D } ctx 
+     * @param { number } x 
+     * @param { number } y 
+     * @param { number } b 
      */
-    draw(x, block) {
-        let pos = this.getPos()
-        // x.fillRect(pos.x * block, pos.y * block, block, block)
-        is.func(this.draw_) ? this.draw_(x, pos, block) : void 0
+    draw(ctx, x, y, b) {
+        // ctx.fillStyle = this.#color
+        // ctx.fillRect(x * b, y * b, b * 2, b * 2)
+        let w = this.#skin.width
+        let h = this.#skin.height
+        ctx.drawImage(this.#skin, (x * b) -(w*2), (y * b) - (h*4), w * 4, h * 4)
+    }
+}
+class MainHero extends SpriteBuild {
+    constructor() {
+        super("MainHero", "#f00", i)
     }
 }
 
-class SudokuScene extends Scene {
-    constructor(block) {
+class HomeScene extends Scene {
+    /** @type { MapGridSystem } */
+    #map
+    /** @type { Sprite2D[] } */
+    #sprite_list
+    constructor() {
         super()
-        this.block = block
-        let grid = new Grid(3, 3)
-        /**
-         * @type { XOXO[] }
-         */
-        this.xoxo_list = []
-        this.X = true
-
-        this.draw_ = function (x) {
-            let c = x.canvas
-            x.beginPath()
-            x.clearRect(0, 0, c.width, c.height)
-            x.strokeStyle = "#000000"
-            grid.draw(x)
-            x.closePath()
-            this.xoxo_list.forEach((xoxo) => {
-                xoxo.draw(x, this.block)
-            })
+        this.b = 20
+        this.size = v2(30, 30)
+        // 2334255463
+        this.mainhero = new MainHero()
+        this.mainhero.setPos(3,3)
+        this.grid = new MapGridSystem("Main sity", this.size, 2009)
+        this.grid.generate()
+        this.draw_ = (ctx) => {
+            ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
+            let b = this.b
+            for (let x = 0; x < this.size.x; x++) {
+                for (let y = 0; y < this.size.y; y++) {
+                    // ctx.fillStyle = Noise.to_hsl((this.grid.getPoint(x, y) * 80) + 80, 100, 30)
+                    ctx.fillStyle = Noise.to_hsl(this.grid.getPoint(x, y)*360)
+                    ctx.fillRect(x * b, y * b, b, b)
+                }
+            }
+            let pos = this.mainhero.getPos()
+            this.mainhero.draw(ctx, pos.x, pos.y, b)
+        }
+        this.tick = () => {
+            this.mainhero.updateX()
+            this.mainhero.updateY()
+            this.mainhero.clear()
         }
     }
-    addXOXO(pos) {
-        this.xoxo_list.push(new XOXO(this.X, pos))
-        this.X = !this.X
+    onclick(ev) {
+        if (this.movementKeysCheck(ev.code)) {
+            let h = this.mainhero
+            switch (ev.code) {
+                case "KeyA":
+                    h.setX(-1)
+                    break
+                case "KeyD":
+                    h.setX(1)
+                    break
+                case "KeyS":
+                    h.setY(1)
+                    break
+                case "KeyW":
+                    h.setY(-1)
+                    break
+            }
+        }
+    }
+    movementKeysCheck(keyCode) {
+        return (keyCode == "KeyA" ||
+            keyCode == "KeyW" ||
+            keyCode == "KeyD" ||
+            keyCode == "KeyS")
     }
 }
-let main = new Main()
 
+class MapGridSystem {
+    /** @type { string } */
+    #MapName
+    /** @type { v2 } */
+    #MapSize
+    /** @type { number } */
+    #MapHeight
+    /**
+     * @param { string } mapName
+     * @param { v2 } size
+     */
+    /** @type { Noise } */
+    #noise
+    /** @type { number[] } */
+    #MAP
+    constructor(mapName = "Map_unnamed", size, seed) {
+        this.#MapName = mapName
+        this.#MapSize = size
+        this.#MapHeight = 3
+        this.#noise = new Noise(seed)
+        this.#MAP = []
+    }
+    /**
+     * @param { number } z
+     */
+    generate(z) {
+        is.empty(z) ? z = 0 : void 0
+        let n = this.#noise
+        let s = this.#MapSize
+        for (let x = 0; x < s.x; x++) {
+            let row = []
+            for (let y = 0; y < s.y; y++) {
+                row.push(n.simplex2(z, x, y))
+            }
+            this.#MAP.push(row)
+        }
+    }
+    getPoint(x, y) {
+        return this.#MAP[x][y]
+    }
+    get MapName() { return this.#MapName }
+    get MapSize() { return this.#MapSize.copy() }
+    get MapHeight() { return this.#MapHeight }
+    get Seed() { return this.#noise.Seed }
+}
+new Main()
 export default Main

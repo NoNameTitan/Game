@@ -18,6 +18,7 @@ class Draw extends Mono {
         super()
         this.canvas = canvas || document.getElementsByTagName("canvas")[0]
         this.ctx = this.canvas.getContext("2d")
+        this.ctx.imageSmoothingEnabled = true
         /** @type {( ctx: CanvasRenderingContext2D ) => void } */
         this.scene
         Draw.#self__ = this
@@ -32,11 +33,6 @@ class Draw extends Mono {
         if (scene instanceof Scene) {
             this.scene = scene
         }
-
-        let c = this.canvas
-
-        c.width < 500 ? c.width = 500 : void 0
-        c.height < 300 ? c.height = 300 : void 0
 
         this.fpsInit()
         this.reSize()
@@ -75,8 +71,8 @@ class Draw extends Mono {
             this.canvas.width = x
             this.canvas.height = y
         } else {
-            this.canvas.width = document.body.clientWidth
-            this.canvas.height = document.body.clientHeight
+            this.canvas.width = globalThis.innerWidth
+            this.canvas.height = globalThis.innerHeight
         }
     }
 

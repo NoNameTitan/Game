@@ -87,6 +87,8 @@ class Engine extends Mono {
         frameTime2 += (thisFrameTime2 - frameTime2) / filterStrength2;
         lastTime2 = thisTime2
 
+        self.#nowScene?.tick(self.#nowScene)
+
         self.#event?.callEvent("tick", self)
         self.updateOnTick ? self.update() : void 0
 
