@@ -35,31 +35,12 @@ function EXTENDS(target, proto) {
         }
     }
 }
-let classes = {}
-function Mono_() {
-    if (this instanceof Mono_) {
-        delete this
-        return new Error("is object for extends")
-    }
-    if (!is.empty(classes[this.constructor.name])) {
-        delete this
-        return new Error("is object a life")
-    }
-    this.self = Mono_
-}
-
 
 class Mono {
     static #classes = {}
     constructor() {
-        // if (this instanceof Mono) {
-        //     delete this
-        //     return new Error("is object for extends")
-        // }
         if (!is.empty(Mono.#classes[this.constructor.name])) {
             delete this
-            console.log(Mono.#classes[this.constructor.name])
-            console.log(this)
             throw new Error("is object a life")
         }
         Mono.#classes[this.constructor.name] = this
@@ -81,7 +62,7 @@ const is = {
      * @param { any }
      * @returns { boolean }
      */
-    arr: Array.isArray.bind(null)
+    array: Array.isArray.bind(null)
 }
 
 /**
@@ -203,7 +184,7 @@ function rgb_assets(value, add) {
     if (add instanceof v3) {
         add = [add.x, add.y, add.z]
     }
-    let result = new Array()
+    let result = []
     for (let i = 0; i < 3; i++) {
         result[i] = value[i] + add[i]
         if (value[i] + add[i] > 255) {
@@ -222,7 +203,6 @@ export {
     is,
     EXTENDS,
     Mono,
-    // Mono_,
     forEach,
     logger,
     rgb,

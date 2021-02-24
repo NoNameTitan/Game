@@ -1,40 +1,22 @@
 import { is } from "./math_.js"
-import Draw from "../draw/draw_.js"
-
-// Types
-/**
- * @typedef {( scene: Scene ) => void } alphaScene
- */
-
-
 
 class Scene {
-    #inited = false
-    constructor() {
-        /** @type { alphaScene } */
-        this.tick = undefined
-        /** @type { alphaScene } */
-        this.init_ = undefined
-        /** @type { alphaScene } */
-        this.update_ = undefined
-        /** @type {( ctx: CanvasRenderingContext2D ) => void } */
-        this.draw_ = undefined
+
+    //#region Private
+    /** @type { HTMLCanvasElement } */ #canvas
+    /** @type { CanvasRenderingContext2D } */ #ctx
+    //#endregion
+
+    /** 
+     * @param { HTMLCanvasElement } canvas
+     */
+    constructor(canvas) {
+        if (is.empty(canvas)) throw new TypeError("Bad canvas")
+        this.#canvas = canvas
+        this.#ctx = canvas.getContext("2d")
     }
-    init() {
-        if (this.#inited) { return }
-        if (is.func(this.init_)) {
-            this.init_(this)
-        }
-        this.#inited = true
-    }
-    update() {
-        if (is.func(this.update_)) {
-            this.update_(this)
-        }
-    }
-    destroy() {
-        delete this
-    }
-    get Inited() { return this.#inited }
+    get canvas() { return this.#canvas }
+    get ctx() { return this.#ctx }
+    destroy() { delete this }
 }
 export default Scene
