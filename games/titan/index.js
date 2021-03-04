@@ -1,4 +1,5 @@
-import { Engine, Scene, Sprite2D, is, Loop, v2, Noise } from "../../index_.js"
+import { rgb, rgb_assets } from "../../core_/math_.js"
+import { Engine, Scene, Sprite2D, is, Loop, LoopMachine, v2, Noise, forEach } from "../../index_.js"
 
 //#region Engine
 class Titan extends Engine {
@@ -37,18 +38,17 @@ class MapGridSystem {
         is.empty(z) ? z = 0 : void 0
         let n = this.#noise
         let s = this.#MapSize
-        for (let x = 0; x < s.x; x++) {
+        for (let y = 0; y < s.y; y++) {
             let row = []
-            for (let y = 0; y < s.y; y++) {
+            for (let x = 0; x < s.x; x++) {
                 row.push(n.simplex2(z, x, y))
             }
             this.#MAP.push(row)
         }
     }
-    getPoint(x, y) {
-        return this.#MAP[x][y]
-    }
+    getPoint(x, y) { return this.#MAP[y][x] }
     get MapName() { return this.#MapName }
+    /** @returns { v2 } */
     get MapSize() { return this.#MapSize.copy() }
     get MapHeight() { return this.#MapHeight }
     get Seed() { return this.#noise.Seed }
@@ -90,29 +90,135 @@ class MainHero extends SpriteBuild {
         super("MainHero", "#f00", img)
     }
 }
-//#region 
+//#endregion 
 
 //#region Scene
 class HomeScene extends Scene {
     constructor(canvas) {
+
+        //#region Constructor
         super(canvas)
-        this.b = 30
-        this.size = v2(30, 30)
+        this.pos = v2(2, 2)
+        this.b = 40
+        this.halfB = this.b / 2
+        this.size = v2(24, 16)
         this.mainhero = new MainHero()
-        this.grid = new MapGridSystem("Main city", this.size, 2334255463)
+        // 2334255463
+        this.grid = new MapGridSystem("Main city", this.size, 406200223296762)
+        //#endregion
+
+        //#region init
         this.mainhero.setPos(3, 3)
         this.grid.generate()
-        new Loop(this.draw.bind(this), true)
-        new Loop(this.tick.bind(this), true)
+        this.resize()
+        //#endregion
+
+        //#region Loop
+        new LoopMachine({
+            render: this.tick.bind(this),
+            draw: this.draw.bind(this)
+        }, { start: true })
+        //#endregion
+
+        //#region AddEventListener
+        addEventListener("resize", this.resize.bind(this))
+        addEventListener("keypress", (ev) => {
+            if (is.WASD(ev.code)) {
+                switch (ev.code.slice(3)) {
+                    case "W":
+                        this.mainhero.setY(-1)
+                        break
+                    case "A":
+                        this.mainhero.setX(-1)
+                        break
+                    case "S":
+                        this.mainhero.setY(1)
+                        break
+                    case "D":
+                        this.mainhero.setX(1)
+                        break
+                }
+            }
+        })
+        //#endregion
+
     }
 
-    draw(time) {
-
-        console.log()
+    //#region Public
+    resize() {
+        this.canvas.width = window.innerWidth
+        this.canvas.height = window.innerHeight
+        this.ctx.translate(this.pos.x * this.b, this.pos.y * this.b)
     }
-    tick(time) {
-
+    clear() {
+        this.ctx.clearRect(-this.pos.x * this.b, -this.pos.y * this.b, this.canvas.width, this.canvas.height)
     }
+    draw() {
+        this.clear()
+        this.drawMap([this.mainhero])
+    }
+    /**
+     * @param { Sprite2D[] } sprite
+     */
+    drawMap(spr = []) {
+        for (let y = 0; y < this.size.y; y++) {
+            for (let x = 0; x < this.size.x; x++) {
+                let p = this.grid.getPoint(x, y)
+                this.drawZ(x, y, p, [0, p * 175 + 40, 0])
+            }
+            spr.forEach((s) => {
+                if (Math.ceil(s.getY()) == y) {
+                    let xy = s.getPos()
+                    this.drawSprite(xy.x, xy.y, this.grid.getPoint(xy.x, xy.y), [200, 0, 0])
+                }
+            })
+        }
+    }
+    drawRect(x, y, color = [0, 0, 0]) {
+        this.ctx.fillStyle = rgb(color)
+        this.ctx.fillRect(x * this.b, y * this.b, this.b, this.b)
+    }
+    drawZ(x, y, z, color = [0, 0, 0]) {
+        this.drawBox(x, y - z, color)
+    }
+    drawSprite(x, y, z, color = [0, 0, 0]) {
+        this.drawBox(x, y - 0.5 - z, color)
+    }
+    drawBox(x, y, color = [0, 0, 0]) {
+        this.ctx.fillStyle = rgb(color)
+        this.ctx.strokeStyle = "black"
+        this.ctx.beginPath()
+        this.ctx.rect(x * this.b, (y * this.b) - this.halfB, this.b, this.b)
+        this.ctx.fill()
+        this.ctx.stroke()
+        this.ctx.closePath()
+        this.ctx.fillStyle = rgb_assets(color, [-45, -45, -45])
+        this.ctx.beginPath()
+        this.ctx.rect(x * this.b, (y * this.b) + this.halfB, this.b, this.halfB)
+        this.ctx.fill()
+        this.ctx.stroke()
+        this.ctx.closePath()
+    }
+    tick() {
+        let m = this.mainhero
+        let s = this.size
+        let p = m.getPos()
+        let a = m.getTo()
+
+        if ((p.x <= 0 && a.x < 0) || (p.x >= s.x - 1 && a.x > 0)) m.setX(0)
+        m.updateX()
+        if (p.x < 0) m.setPosX(0)
+        if (p.x > s.x - 1) m.setPosX(s.x - 1)
+
+        if ((p.y <= 0 && a.y < 0) || (p.y >= s.y - 1 && a.y > 0)) m.setY(0)
+        m.updateY()
+        if (p.y < 0) m.setPosY(0)
+        if (p.y > s.y - 1) m.setPosY(s.y - 1)
+
+        m.clear()
+    }
+    //#endregion
+
 }
-new Titan()
+globalThis.titan = new Titan()
 //#endregion

@@ -42,9 +42,7 @@ export default class Noise {
         this.noise.push(this.#zz / this.#m)
     }
     simplex2(x, y = 0, z = 0) {
-        for (let i = 0; i < PERLIN_SIZE + 1; i++) {
-            this.#point()
-        }
+        for (let i = 0; i < PERLIN_SIZE + 1; i++) { this.#point() }
         return Noise.#NoiseSimplex2(x, y, z, this.noise)
     }
     /**
@@ -111,6 +109,12 @@ export default class Noise {
         if ("number" !== typeof hue) { throw new Error("The Hue is not a digit") }
         is.empty(saturate) ? saturate = 100 : void 0
         is.empty(brightness) ? brightness = 50 : void 0
-        return `hsl(${hue % 360}, ${saturate}%, ${brightness}%)`
+        return `hsl(${hue % 360},${saturate}%,${brightness}%)`
+    }
+    /**
+     * @param { number } value
+     */
+    static black_white(value) {
+        return "hsla(0,0%," + (value * 100) + "%)"
     }
 }

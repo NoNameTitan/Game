@@ -114,5 +114,6 @@ class Sprite2D {
     }
     //#endregion
 }
+
 globalThis.sprite = Sprite2D
 export default Sprite2D

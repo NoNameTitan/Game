@@ -1,10 +1,8 @@
-// Types
-/**
- * @typedef {( ) => void } alpha
- */
-/**
- * @typedef {( value: any, index: number ) => (void|boolean) } iterable
- */
+//#region Types
+/** @typedef {( ) => void } alpha */
+/** @typedef { number } n */
+/** @typedef {( value: any, index: number ) => (void|boolean) } iterable */
+//#endregion
 
 
 
@@ -35,6 +33,18 @@ function EXTENDS(target, proto) {
         }
     }
 }
+/**
+ * @param { new { }} tardet
+ * @param {{}[]} extend
+ */
+let getOwn__ = Object.getOwnPropertyNames
+function Mixin(target, extend) {
+    extend.forEach(p => {
+        getOwn__(p.prototype).forEach(n => {
+            if (!getOwn__(target.prototype).includes(n) && n.slice(0, 2) !== "__") target.prototype[n] = p.prototype[n]
+        })
+    })
+}
 
 class Mono {
     static #classes = {}
@@ -48,34 +58,44 @@ class Mono {
 }
 
 const is = {
-    empty: (value) => {
-        return (value == undefined || value == null)
-    },
-    func: (value) => {
-        return (typeof value == "function")
-    },
-    notClass: (value) => {
-        return (value == globalThis || is.empty(value))
-    },
+    empty: (value) => { return (value == undefined || value == null) },
+    func: (value) => { return (typeof value == "function") },
+    notClass: (value) => { return (value == globalThis || is.empty(value)) },
     /**
      * @type {( value: any ) => boolean }
      * @param { any }
      * @returns { boolean }
      */
-    array: Array.isArray.bind(null)
+    array: Array.isArray.bind(null),
+    /**
+     * @param { string } value
+     */
+    WASD: (value) => { return !!(value == "KeyW" | value == "KeyA" | value == "KeyS" | value == "KeyD") }
 }
 
 /**
+ * @type {new (x:n,y:n)=>v2}
  * @param { number } x
  * @param { number } y
+ * @property {v2} copy
+ * @returns {{
+ * x: n,
+ * y: n,
+ * copy: (x: n, y: n) => v2
+ * }}
  */
 function v2(x, y) {
-    if (is.notClass(this)) {
-        return new v2(x, y)
-    }
+    if (is.notClass(this)) return new v2(x, y)
     this.x = (x || 0)
     this.y = (y || 0)
 }
+/** 
+ * @typedef {{
+ * x: n,
+ * y: n,
+ * copy: (x: n, y: n) => v2
+ * }} v2 
+ */
 
 EXTENDS(v2, {
     set: function (x = 1, y = 1) {
@@ -86,22 +106,14 @@ EXTENDS(v2, {
         this.x = this.x + x
         this.y = this.y + y
     },
-    addX: function (x = 0) {
-        this.x = this.x + x
-    },
-    addY: function (y = 0) {
-        this.y = this.y + y
-    },
+    addX: function (x = 0) { this.x = this.x + x },
+    addY: function (y = 0) { this.y = this.y + y },
     push: function (second = v2()) {
         this.x = this.x + second.x
         this.y = this.y + second.y
     },
-    copy: function (x, y) {
-        return new v2(this.x * (x || 1), this.y * (y || 1))
-    },
-    clear: function () {
-        this.x = this.y = 0
-    }
+    copy: function (x, y) { return new v2(this.x * (x || 1), this.y * (y || 1)) },
+    clear: function () { this.x = this.y = 0 }
 })
 
 /**
@@ -168,16 +180,14 @@ let colors = {
  * @param { number[] | v3 } value
  */
 function rgb(value) {
-    if (value instanceof v3) {
-        return `rgb(${value.x}, ${value.y}, ${value.z})`
-    }
-    return `rgb(${value[0]}, ${value[1]}, ${value[2]})`
+    if (value instanceof v3) return `rgb(${value.x},${value.y},${value.z})`
+    return `rgb(${value[0]},${value[1]},${value[2]})`
 }
 /**
  * @param { number[] | v3 } value
  * @param { number[] | v3 } add
  */
-function rgb_assets(value, add) {
+function rgb_assets_(value, add) {
     if (value instanceof v3) {
         value = [value.x, value.y, value.z]
     }
@@ -194,15 +204,28 @@ function rgb_assets(value, add) {
             result[i] = 0
         }
     }
-    return `rgb(${result[0]}, ${result[1]}, ${result[2]})`
+    return `rgb(${result[0]},${result[1]},${result[2]})`
 }
-
+/**
+ * @param { number[] } value
+ * @param { number[] } add
+ */
+function rgb_assets(value, add) {
+    let r = []
+    for (let i = 0; i < 3; i++) {
+        r[i] = value[i] + add[i]
+        if (value[i] + add[i] > 255) r[i] = 255
+        if (value[i] + add[i] < 0) r[i] = 0
+    }
+    return `rgb(${r[0]},${r[1]},${r[2]})`
+}
 export {
     v2,
     v3,
     is,
     EXTENDS,
     Mono,
+    Mixin,
     forEach,
     logger,
     rgb,
